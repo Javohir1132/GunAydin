@@ -1,11 +1,1295 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GunAydin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --black:#0F0F0F; --black2:#1A1A1A; --charcoal:#2C2C2C;
+  --mid:#555555; --muted:#888888;
+  --border:#E2DDD7; --border-dark:#C8C2BA;
+  --warm:#F6F3EF; --warm2:#EEE9E2;
+  --white:#FEFCFA; --accent:#E8420F; --accent2:#FF5722;
+  --yellow:#FFB300;
+  --radius:16px; --radius-sm:10px;
+  --speed:300ms; --ease:cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--warm);color:var(--black);min-height:100vh;overflow-x:hidden;}
+
+.app-shell{max-width:480px;margin:0 auto;background:var(--white);min-height:100vh;position:relative;overflow:hidden;}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;background:var(--black);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .55s var(--ease), visibility .55s var(--ease);
+}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:3.8rem;color:#fff;letter-spacing:6px;line-height:1;}
+.loader-logo span{color:var(--accent2);}
+.loader-icon{font-size:2rem;margin-bottom:4px;animation:bounce .8s ease infinite alternate;}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-8px);}}
+.loader-sub{font-size:.62rem;color:var(--muted);letter-spacing:5px;text-transform:uppercase;font-weight:500;}
+.loader-bar{width:180px;height:2px;background:var(--charcoal);border-radius:2px;overflow:hidden;margin-top:6px;}
+.loader-bar-inner{height:100%;width:0%;background:var(--accent2);border-radius:2px;animation:loadBar 2.3s ease forwards;}
+@keyframes loadBar{to{width:100%;}}
+
+/* SCREENS */
+.screen{
+  position:absolute;inset:0;
+  background:var(--white);
+  overflow-y:auto;
+  opacity:0;
+  transform:translateX(32px);
+  pointer-events:none;
+  transition:opacity var(--speed) var(--ease), transform var(--speed) var(--ease);
+  will-change:transform,opacity;
+}
+.screen.active{
+  position:relative;
+  opacity:1;
+  transform:translateX(0);
+  pointer-events:all;
+}
+
+/* HERO */
+.hero{
+  position:relative;height:310px;background:var(--black);overflow:hidden;
+  display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:0 0 34px 22px;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:url("https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&q=80") center/cover no-repeat;
+  opacity:.3;
+  transform:scale(1.04);
+  transition:opacity .4s;
+}
+.hero::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:160px;
+  background:linear-gradient(to top,var(--black),transparent);
+}
+.hero-inner{position:relative;z-index:1;}
+.hero-tagline{font-size:.58rem;color:rgba(255,255,255,.5);letter-spacing:5px;text-transform:uppercase;margin-bottom:6px;font-weight:600;animation:fadeUp .6s ease 2.5s both;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.4rem,9vw,5rem);color:#fff;line-height:.9;letter-spacing:4px;animation:fadeUp .6s ease 2.7s both;}
+.hero-title .orange{color:var(--accent2);}
+.hero-subtitle{font-size:.62rem;color:rgba(255,255,255,.38);letter-spacing:3px;text-transform:uppercase;margin-top:8px;animation:fadeUp .6s ease 2.9s both;font-weight:400;}
+.hero-badge{
+  display:inline-block;background:var(--accent2);color:#fff;
+  font-size:.55rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 10px;border-radius:4px;margin-bottom:10px;
+  animation:fadeUp .6s ease 2.4s both;
+}
+
+/* INFO CARD */
+.info-card{
+  background:var(--white);margin:0 14px;border-radius:var(--radius);padding:18px;
+  position:relative;z-index:10;margin-top:-30px;
+  border:1.5px solid var(--border);box-shadow:0 14px 44px rgba(0,0,0,.1);
+  animation:fadeUp .6s ease 3s both;
+}
+.info-name{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:3px;color:var(--black);margin-bottom:10px;}
+.info-name span{color:var(--accent2);}
+.info-row{display:flex;align-items:center;gap:8px;font-size:.73rem;color:var(--mid);margin-bottom:7px;font-weight:500;}
+.info-row i{color:var(--accent);font-size:.76rem;width:15px;flex-shrink:0;}
+.info-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
+.info-meta .info-row{margin:0;}
+.info-tagline{font-size:.74rem;color:var(--muted);line-height:1.65;border-left:2.5px solid var(--accent2);padding-left:11px;margin-top:4px;font-family:'DM Serif Display',serif;font-style:italic;}
+
+/* TABS */
+.tabs-wrap{display:flex;gap:6px;padding:16px 14px 0;animation:fadeUp .6s ease 3.1s both;}
+.tab-btn{
+  flex:1;padding:10px 4px;border-radius:50px;border:1.5px solid var(--border);
+  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:.64rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.tab-btn.active{background:var(--black);border-color:var(--black);color:#fff;}
+.tab-btn:hover:not(.active){border-color:var(--charcoal);color:var(--black);}
+.tab-btn:active{transform:scale(.96);}
+
+/* SEARCH */
+.search-wrap{padding:12px 14px;animation:fadeUp .6s ease 3.2s both;}
+.search-box{
+  display:flex;align-items:center;background:var(--warm);border-radius:50px;
+  border:1.5px solid var(--border);padding:10px 16px;gap:10px;
+  transition:border-color .25s,box-shadow .25s;
+}
+.search-box:focus-within{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(232,66,15,.08);}
+.search-box input{flex:1;background:none;border:none;outline:none;color:var(--black);font-family:'DM Sans',sans-serif;font-size:.8rem;}
+.search-box input::placeholder{color:var(--muted);}
+.search-box i{color:var(--muted);font-size:.82rem;}
+
+/* SECTION */
+.section-label{padding:6px 14px 8px;font-size:.58rem;letter-spacing:3.5px;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.divider{width:32px;height:2px;background:var(--accent2);margin:0 14px 14px;border-radius:1px;}
+
+/* Tab panels */
+.tab-panels{position:relative;}
+.tab-panel{
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  position:absolute;top:0;left:0;right:0;
+  transition:opacity 240ms var(--ease), transform 240ms var(--ease);
+  will-change:opacity,transform;
+}
+.tab-panel.active{
+  opacity:1;transform:translateY(0);pointer-events:auto;position:relative;
+}
+
+/* CATEGORY CARDS */
+.categories-grid{display:flex;flex-direction:column;gap:10px;padding:0 14px 110px;}
+
+.cat-card{
+  position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  border:1.5px solid var(--border);
+  transform:translateZ(0);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cat-card:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 14px 36px rgba(0,0,0,.12);border-color:var(--accent2);}
+.cat-card:active{transform:scale(.975);}
+.cat-card-inner{display:flex;height:120px;}
+.cat-card-img-wrap{width:42%;flex-shrink:0;overflow:hidden;position:relative;}
+.cat-card img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(10%);
+  transition:transform .55s var(--ease),filter .3s;
+  will-change:transform;
+}
+.cat-card:hover img{transform:scale(1.07);filter:grayscale(0%);}
+.cat-card-content{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:14px 16px;background:var(--white);position:relative;
+}
+.cat-card-content::before{
+  content:'';position:absolute;left:0;top:16px;bottom:16px;
+  width:2.5px;background:var(--accent2);border-radius:1px;
+  transform:scaleY(0);transform-origin:center;
+  transition:transform .3s var(--ease) .05s;
+}
+.cat-card:hover .cat-card-content::before{transform:scaleY(1);}
+.cat-card-label{font-size:.53rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.cat-card-title{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--black);letter-spacing:1.5px;line-height:1.1;margin-bottom:8px;}
+.cat-card-arrow{
+  width:28px;height:28px;border-radius:50%;background:var(--accent2);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:.65rem;
+  transition:transform .3s var(--ease),background .2s;
+}
+.cat-card:hover .cat-card-arrow{transform:translateX(4px);background:var(--accent);}
+.cat-card-badge{
+  position:absolute;top:10px;right:10px;
+  background:var(--accent2);color:#fff;
+  font-size:.5rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 9px;border-radius:20px;
+}
+.cat-card-badge.yellow{background:var(--yellow);color:#000;}
+
+.cat-card:nth-child(1){animation:fadeUp .45s ease 3.2s both;}
+.cat-card:nth-child(2){animation:fadeUp .45s ease 3.28s both;}
+.cat-card:nth-child(3){animation:fadeUp .45s ease 3.36s both;}
+.cat-card:nth-child(4){animation:fadeUp .45s ease 3.44s both;}
+.cat-card:nth-child(5){animation:fadeUp .45s ease 3.52s both;}
+.cat-card:nth-child(6){animation:fadeUp .45s ease 3.6s both;}
+
+/* ITEMS HEADER */
+.items-header{
+  display:flex;align-items:center;gap:12px;padding:14px 14px 10px;
+  position:sticky;top:0;
+  background:rgba(254,252,250,.96);backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  z-index:100;border-bottom:1.5px solid var(--border);
+}
+.back-btn{
+  width:36px;height:36px;border-radius:50%;background:var(--warm);border:1.5px solid var(--border);
+  color:var(--black);font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,color .2s,transform .15s;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.back-btn:hover{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.back-btn:active{transform:scale(.9);}
+.items-header-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2.5px;color:var(--black);}
+.items-list{padding:12px 14px 110px;display:flex;flex-direction:column;gap:14px;}
+
+/* ITEM CARD */
+.item-card{
+  background:var(--white);border-radius:var(--radius);
+  overflow:hidden;border:1.5px solid var(--border);
+  display:flex;flex-direction:column;
+  transform:translateZ(0);
+  transition:border-color .25s var(--ease),box-shadow .25s var(--ease),transform .2s var(--ease);
+  animation:fadeUp .38s ease both;
+  -webkit-tap-highlight-color:transparent;
+  cursor:pointer;
+}
+.item-card:hover{border-color:var(--accent2);box-shadow:0 8px 28px rgba(232,66,15,.12);transform:translateY(-2px);}
+.item-card:active{transform:scale(.99);}
+.item-img-wrap{position:relative;overflow:hidden;height:180px;}
+.item-img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(8%);
+  transition:transform .55s var(--ease),filter .3s;
+  will-change:transform;
+}
+.item-card:hover .item-img{transform:scale(1.06);filter:grayscale(0%);}
+.item-price-pill{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(15,15,15,.88);backdrop-filter:blur(6px);
+  color:#fff;padding:5px 14px;border-radius:20px;
+  font-family:'DM Serif Display',serif;font-size:.95rem;
+}
+.item-body{padding:12px 14px 14px;display:flex;align-items:center;gap:12px;}
+.item-text{flex:1;min-width:0;}
+.item-name{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1.5px;color:var(--black);margin-bottom:4px;line-height:1.1;}
+.item-desc{font-size:.7rem;color:var(--muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+.add-btn{
+  width:40px;height:40px;border-radius:50%;background:var(--accent2);border:none;color:#fff;
+  font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;overflow:hidden;
+  transition:background .25s,transform .2s var(--ease),box-shadow .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.add-btn::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:rgba(255,255,255,.3);transform:scale(0);opacity:0;
+  transition:transform .35s var(--ease),opacity .35s;
+}
+.add-btn:active::after{transform:scale(1.6);opacity:1;transition-duration:.15s;}
+.add-btn:hover{background:var(--accent);transform:scale(1.1);box-shadow:0 4px 14px rgba(232,66,15,.3);}
+.add-btn:active{transform:scale(.93);}
+.add-btn.added{background:var(--black);}
+
+/* CART FAB */
+.cart-fab{
+  position:fixed;bottom:22px;right:calc(50% - 222px);
+  background:var(--accent2);color:#fff;width:56px;height:56px;
+  border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+  box-shadow:0 6px 24px rgba(232,66,15,.4);
+  transition:background .2s,transform .2s var(--ease),box-shadow .2s;
+  z-index:500;-webkit-tap-highlight-color:transparent;
+}
+@media(max-width:480px){.cart-fab{right:18px;}}
+.cart-fab:hover{background:var(--accent);transform:scale(1.08);box-shadow:0 8px 28px rgba(232,66,15,.5);}
+.cart-fab:active{transform:scale(.93);}
+.cart-badge{
+  position:absolute;top:-5px;right:-5px;background:var(--yellow);color:#000;
+  min-width:21px;height:21px;border-radius:11px;font-size:.62rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--white);padding:0 4px;
+  opacity:0;transform:scale(0);
+  transition:opacity .3s cubic-bezier(.34,1.56,.64,1),transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.cart-badge.visible{opacity:1;transform:scale(1);}
+
+/* CART BACKDROP */
+.cart-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;
+  opacity:0;visibility:hidden;backdrop-filter:blur(4px);
+  transition:opacity .3s var(--ease),visibility .3s;
+}
+.cart-backdrop.open{opacity:1;visibility:visible;}
+
+/* CART DRAWER */
+.cart-drawer{
+  position:fixed;bottom:0;left:50%;
+  transform:translateX(-50%) translateY(100%);
+  width:100%;max-width:480px;background:var(--white);
+  border-radius:22px 22px 0 0;z-index:900;max-height:88vh;overflow-y:auto;
+  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  border-top:1.5px solid var(--border);
+  box-shadow:0 -8px 40px rgba(0,0,0,.12);
+  will-change:transform;
+}
+.cart-drawer.open{transform:translateX(-50%) translateY(0);}
+.cart-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 0;}
+.cart-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 12px;border-bottom:1.5px solid var(--border);
+}
+.cart-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(--black);}
+.cart-close{
+  width:32px;height:32px;border-radius:50%;background:var(--warm);border:1.5px solid var(--border);
+  color:var(--mid);font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,color .2s,transform .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cart-close:hover{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.cart-close:active{transform:scale(.9);}
+.cart-items-wrap{padding:8px 20px;}
+.cart-item{
+  display:flex;align-items:center;gap:12px;padding:11px 0;
+  border-bottom:1.5px solid var(--warm2);
+  animation:fadeUp .3s ease both;
+}
+.cart-item:last-child{border-bottom:none;}
+.cart-item-img{width:56px;height:56px;border-radius:11px;object-fit:cover;flex-shrink:0;}
+.cart-item-info{flex:1;min-width:0;}
+.cart-item-name{font-size:.8rem;font-weight:600;color:var(--black);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cart-item-price{font-family:'DM Serif Display',serif;font-size:.92rem;color:var(--black);}
+.qty-controls{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.qty-btn{
+  width:27px;height:27px;border-radius:50%;border:1.5px solid var(--border);
+  background:var(--warm);color:var(--black);font-size:.75rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,color .2s,transform .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.qty-btn:hover{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.qty-btn:active{transform:scale(.88);}
+.qty-num{font-size:.83rem;font-weight:700;color:var(--black);min-width:18px;text-align:center;}
+.cart-empty-msg{text-align:center;padding:38px 20px;color:var(--muted);font-size:.8rem;}
+.cart-empty-msg i{font-size:2rem;color:var(--border);display:block;margin-bottom:10px;}
+.cart-footer{padding:14px 20px 28px;border-top:1.5px solid var(--border);background:var(--warm);}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.cart-total-label{font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.cart-total-val{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--black);}
+.order-btn{
+  width:100%;padding:14px;border-radius:50px;background:var(--accent2);border:none;color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;
+  transition:background .2s,transform .2s,box-shadow .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.order-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 5px 18px rgba(232,66,15,.3);}
+.order-btn:active{transform:scale(.98);}
+
+/* ORDER MODAL */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;
+  display:flex;align-items:flex-end;
+  opacity:0;visibility:hidden;backdrop-filter:blur(5px);
+  transition:opacity .3s var(--ease),visibility .3s;
+}
+.modal-backdrop.open{opacity:1;visibility:visible;}
+.modal{
+  background:var(--white);width:100%;max-width:480px;margin:0 auto;
+  border-radius:22px 22px 0 0;padding:0 20px 36px;
+  transform:translateY(100%);
+  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  border-top:1.5px solid var(--border);
+  max-height:92vh;overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.12);
+  will-change:transform;
+}
+.modal-backdrop.open .modal{transform:translateY(0);}
+.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 20px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--black);text-align:center;margin-bottom:4px;}
+.modal-subtitle{text-align:center;font-size:.71rem;color:var(--muted);margin-bottom:22px;letter-spacing:.5px;}
+.form-group{margin-bottom:13px;}
+.form-label{display:block;font-size:.64rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:6px;}
+.form-input{
+  width:100%;padding:12px 14px;background:var(--warm);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--black);font-family:'DM Sans',sans-serif;font-size:.82rem;
+  outline:none;transition:border-color .25s,box-shadow .25s;
+}
+.form-input:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(232,66,15,.08);}
+.form-input::placeholder{color:var(--muted);}
+.form-input.error{border-color:var(--accent);animation:shake .3s ease;}
+.submit-btn{
+  width:100%;padding:14px;border-radius:50px;background:var(--accent2);border:none;color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;margin-top:8px;
+  transition:background .2s,transform .2s,box-shadow .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.submit-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 5px 16px rgba(232,66,15,.25);}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* SUCCESS */
+#success-screen{display:none;text-align:center;padding:28px 10px 10px;}
+#success-screen.show{display:block;}
+.success-icon{font-size:2.6rem;color:var(--accent2);margin-bottom:14px;}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--black);margin-bottom:8px;}
+.success-text{font-size:.76rem;color:var(--muted);line-height:1.75;}
+
+/* SEARCH RESULTS */
+#search-results-wrap{
+  opacity:0;pointer-events:none;position:absolute;top:0;left:0;right:0;
+  transition:opacity 200ms var(--ease);
+}
+#search-results-wrap.active{opacity:1;pointer-events:auto;position:relative;}
+
+/* ITEM DETAIL MODAL */
+.item-detail-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1100;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:opacity .32s var(--ease),visibility .32s;
+}
+.item-detail-backdrop.open{opacity:1;visibility:visible;}
+.item-detail-sheet{
+  background:var(--white);width:100%;max-width:480px;
+  border-radius:24px 24px 0 0;overflow:hidden;
+  transform:translateY(100%);
+  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  will-change:transform;max-height:92vh;display:flex;flex-direction:column;
+}
+.item-detail-backdrop.open .item-detail-sheet{transform:translateY(0);}
+.item-detail-img-wrap{position:relative;height:260px;overflow:hidden;flex-shrink:0;}
+.item-detail-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease);}
+.item-detail-backdrop.open .item-detail-img{transform:scale(1.04);}
+.item-detail-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,15,15,.85) 0%,transparent 55%);}
+.item-detail-close{
+  position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
+  background:rgba(15,15,15,.55);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,transform .15s;-webkit-tap-highlight-color:transparent;z-index:2;
+}
+.item-detail-close:hover{background:var(--accent2);transform:scale(1.08);}
+.item-detail-close:active{transform:scale(.9);}
+.item-detail-price-tag{
+  position:absolute;bottom:16px;left:16px;
+  background:rgba(15,15,15,.82);backdrop-filter:blur(8px);
+  color:#fff;padding:6px 16px;border-radius:20px;
+  font-family:'DM Serif Display',serif;font-size:1.15rem;
+  border:1px solid rgba(255,255,255,.12);z-index:2;
+}
+.item-detail-body{padding:20px 20px 32px;overflow-y:auto;flex:1;}
+.item-detail-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.item-detail-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;color:var(--black);margin-bottom:8px;line-height:1;}
+.item-detail-desc{font-size:.8rem;color:var(--muted);line-height:1.75;margin-bottom:22px;font-family:'DM Serif Display',serif;font-style:italic;}
+.item-detail-divider{width:100%;height:1.5px;background:var(--warm2);border-radius:1px;margin-bottom:22px;}
+.item-detail-add-row{display:flex;align-items:center;gap:14px;}
+.item-detail-qty{
+  display:flex;align-items:center;gap:10px;background:var(--warm);border-radius:50px;
+  padding:6px 8px;border:1.5px solid var(--border);
+}
+.item-detail-qty-btn{
+  width:32px;height:32px;border-radius:50%;background:var(--white);
+  border:1.5px solid var(--border);color:var(--black);font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,color .2s,transform .15s,border-color .2s;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0;
+}
+.item-detail-qty-btn:hover{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.item-detail-qty-btn:active{transform:scale(.88);}
+.item-detail-qty-num{font-size:.95rem;font-weight:700;color:var(--black);min-width:24px;text-align:center;}
+.item-detail-add-btn{
+  flex:1;padding:14px;border-radius:50px;background:var(--accent2);
+  border:none;color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  transition:background .2s,transform .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent;
+}
+.item-detail-add-btn:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,66,15,.3);}
+.item-detail-add-btn:active{transform:scale(.97);}
+.item-detail-add-btn.added{background:var(--black);}
+
+/* FOOTER */
+.site-footer{
+  padding:24px 20px 32px;border-top:1.5px solid var(--border);
+  background:var(--warm);text-align:center;margin-top:8px;
+}
+.site-footer-brand{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:4px;color:var(--black);margin-bottom:4px;}
+.site-footer-brand span{color:var(--accent2);}
+.site-footer-line{width:28px;height:2px;background:var(--accent2);border-radius:1px;margin:10px auto;}
+.site-footer-credit{font-size:.63rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:500;line-height:1.8;}
+.site-footer-credit strong{color:var(--black);font-weight:700;letter-spacing:1px;font-family:'DM Serif Display',serif;font-style:italic;font-size:.75rem;text-transform:none;}
+.site-footer-dot{display:inline-block;width:3px;height:3px;background:var(--accent2);border-radius:50%;margin:0 6px;vertical-align:middle;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:2px;}
+
+/* RESPONSIVE */
+@media(max-width:360px){
+  .hero-title{font-size:3rem;}
+  .cat-card-inner{height:108px;}
+  .item-img-wrap{height:155px;}
+}
+@media(min-width:481px){
+  .app-shell{box-shadow:0 0 60px rgba(0,0,0,.12);}
+}
+</style>
 </head>
 <body>
-    <h1>Hello World</h1>
+
+<!-- LOADER -->
+<div id="loader">
+  <div style="font-size:2.2rem;">🍔</div>
+  <div class="loader-logo">Gun<span>Aydin</span></div>
+  <div class="loader-sub">Toshkent, O'zbekiston</div>
+  <div class="loader-bar"><div class="loader-bar-inner"></div></div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell">
+<div id="app" style="position:relative;overflow:hidden;">
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-inner">
+        <div class="hero-badge">🔥 Tez yetkazib berish</div>
+        <div class="hero-tagline">Xush kelibsiz</div>
+        <div class="hero-title">Gun<span class="orange">Aydin</span></div>
+        <div class="hero-subtitle">Fast Food Restoran — Toshkent, O'zbekiston</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-name">Gun<span>Aydin</span> 🍔</div>
+      <div class="info-row"><i class="fa-solid fa-location-dot"></i> Chilonzor tumani, Toshkent shahri</div>
+      <div class="info-meta">
+        <div class="info-row"><i class="fa-solid fa-phone"></i> 99 123 45 67</div>
+        <div class="info-row"><i class="fa-solid fa-wifi"></i> GunAydin_WiFi</div>
+      </div>
+      <div class="info-tagline">Tez, mazali va arzon! Har kuni yangi ingredientlar bilan tayyorlanamiz.</div>
+    </div>
+
+    <div class="tabs-wrap">
+      <button class="tab-btn active" onclick="switchTab(this,'taomlar')">Taomlar</button>
+      <button class="tab-btn" onclick="switchTab(this,'ichimliklar')">Ichimliklar</button>
+      <button class="tab-btn" onclick="switchTab(this,'desert')">Desert</button>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Taom qidirish..." oninput="onSearch(this.value)">
+      </div>
+    </div>
+
+    <div class="tab-panels" id="tab-panels-container">
+
+      <!-- SEARCH RESULTS -->
+      <div id="search-results-wrap">
+        <div class="section-label">Qidiruv natijalari</div>
+        <div class="divider"></div>
+        <div class="items-list" id="search-results-list" style="padding-top:0;"></div>
+      </div>
+
+      <!-- TAOMLAR -->
+      <div id="tab-taomlar" class="tab-panel active">
+        <div class="section-label">Kategoriyalar</div>
+        <div class="divider"></div>
+        <div class="categories-grid">
+          <div class="cat-card" onclick="openCategory('burgers')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80" alt="Burgers" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Eng mashhur</div>
+                <div class="cat-card-title">Burgerlar</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+            <div class="cat-card-badge">🔥 Hit</div>
+          </div>
+          <div class="cat-card" onclick="openCategory('hotdog')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1612392062798-dab94db5da41?w=600&q=80" alt="Hot Dog" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Klassik</div>
+                <div class="cat-card-title">Hot Dog</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('pizza')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80" alt="Pizza" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Italiya uslubi</div>
+                <div class="cat-card-title">Pizza</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+            <div class="cat-card-badge yellow">Yangi</div>
+          </div>
+          <div class="cat-card" onclick="openCategory('shawarma')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80" alt="Shawarma" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Mashhur</div>
+                <div class="cat-card-title">Shawarma</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('kartoshka')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80" alt="Kartoshka" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Qo'shimcha</div>
+                <div class="cat-card-title">Fri Kartoshka</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('combo')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80" alt="Combo" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Tejamkor</div>
+                <div class="cat-card-title">Kombo To'plamlar</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+            <div class="cat-card-badge">💰 Arzon</div>
+          </div>
+        </div>
+
+        <div class="site-footer">
+          <div class="site-footer-brand">Gun<span>Aydin</span></div>
+          <div class="site-footer-line"></div>
+          <div class="site-footer-credit">
+            Designed &amp; developed by<br>
+            <strong>Javohir Javlonboyev</strong>
+            <span class="site-footer-dot"></span>
+            2026
+          </div>
+        </div>
+      </div>
+
+      <!-- ICHIMLIKLAR -->
+      <div id="tab-ichimliklar" class="tab-panel">
+        <div class="section-label">Ichimliklar</div>
+        <div class="divider"></div>
+        <div class="categories-grid">
+          <div class="cat-card" onclick="openCategory('gazli')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80" alt="Gazli" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Sovuq</div>
+                <div class="cat-card-title">Gazli Ichimliklar</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+            <div class="cat-card-badge">Yangi</div>
+          </div>
+          <div class="cat-card" onclick="openCategory('milkshake')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80" alt="Milkshake" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Kremli</div>
+                <div class="cat-card-title">Milkshake</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('limonad')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80" alt="Limonad" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Tabiiy</div>
+                <div class="cat-card-title">Limonad</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('kofe')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80" alt="Kofe" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Aromat</div>
+                <div class="cat-card-title">Kofe</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESERT -->
+      <div id="tab-desert" class="tab-panel">
+        <div class="section-label">Desertlar</div>
+        <div class="divider"></div>
+        <div class="categories-grid">
+          <div class="cat-card" onclick="openCategory('icecream')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&q=80" alt="Ice Cream" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Sovuq</div>
+                <div class="cat-card-title">Muzqaymoq</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+            <div class="cat-card-badge yellow">🍦 Yangi</div>
+          </div>
+          <div class="cat-card" onclick="openCategory('donuts')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80" alt="Donuts" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Shirinlik</div>
+                <div class="cat-card-title">Donut</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="cat-card" onclick="openCategory('nuggets')">
+            <div class="cat-card-inner">
+              <div class="cat-card-img-wrap">
+                <img src="https://images.unsplash.com/photo-1562967916-eb82221dfb92?w=600&q=80" alt="Nuggets" loading="lazy">
+              </div>
+              <div class="cat-card-content">
+                <div class="cat-card-label">Bolalar uchun</div>
+                <div class="cat-card-title">Nuggets</div>
+                <div class="cat-card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /screen-home -->
+
+  <!-- ITEMS SCREEN -->
+  <div id="screen-items" class="screen">
+    <div class="items-header">
+      <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="items-header-title" id="items-title"></div>
+    </div>
+    <div class="items-list" id="items-list"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- CART FAB -->
+<button class="cart-fab" onclick="openCart()">
+  <i class="fa-solid fa-bag-shopping"></i>
+  <div class="cart-badge" id="cart-badge">0</div>
+</button>
+
+<!-- CART BACKDROP -->
+<div class="cart-backdrop" id="cart-backdrop" onclick="closeCart()"></div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-handle"></div>
+  <div class="cart-header">
+    <div class="cart-title">Savat 🛍️</div>
+    <button class="cart-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="cart-items-wrap" id="cart-items-wrap"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-total-row">
+      <div class="cart-total-label">Jami summa</div>
+      <div class="cart-total-val" id="cart-total"></div>
+    </div>
+    <button class="order-btn" onclick="openOrderModal()">🚀 Buyurtma berish</button>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal-backdrop" id="order-modal" onclick="backdropClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="order-form-wrap">
+      <div class="modal-title">Buyurtma berish</div>
+      <div class="modal-subtitle">Ma'lumotlaringizni kiriting</div>
+      <div class="form-group">
+        <label class="form-label" for="f-name">Ismingiz</label>
+        <input type="text" class="form-input" id="f-name" placeholder="To'liq ismingiz" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-phone">Telefon raqam</label>
+        <input type="tel" class="form-input" id="f-phone" placeholder="+998 XX XXX XX XX" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-address">Manzil</label>
+        <input type="text" class="form-input" id="f-address" placeholder="Tuman, Mahalla, Ko'cha, uy raqami" autocomplete="street-address">
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Yuborish</button>
+    </div>
+    <div id="success-screen">
+      <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="success-title">Buyurtma qabul qilindi!</div>
+      <div class="success-text">Tez orada operator siz bilan bog'lanadi.<br>Rahmat! 🎉</div>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="item-detail-backdrop" id="item-detail-backdrop" onclick="itemDetailBackdropClick(event)">
+  <div class="item-detail-sheet" id="item-detail-sheet">
+    <div class="item-detail-img-wrap">
+      <img class="item-detail-img" id="item-detail-img" src="" alt="">
+      <div class="item-detail-img-overlay"></div>
+      <button class="item-detail-close" onclick="closeItemDetail()"><i class="fa-solid fa-xmark"></i></button>
+      <div class="item-detail-price-tag" id="item-detail-price"></div>
+    </div>
+    <div class="item-detail-body">
+      <div class="item-detail-handle"></div>
+      <div class="item-detail-name" id="item-detail-name"></div>
+      <div class="item-detail-desc" id="item-detail-desc"></div>
+      <div class="item-detail-divider"></div>
+      <div class="item-detail-add-row">
+        <div class="item-detail-qty">
+          <button class="item-detail-qty-btn" onclick="changeDetailQty(-1)"><i class="fa-solid fa-minus"></i></button>
+          <div class="item-detail-qty-num" id="item-detail-qty-num">1</div>
+          <button class="item-detail-qty-btn" onclick="changeDetailQty(1)"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <button class="item-detail-add-btn" id="item-detail-add-btn" onclick="addFromDetail()">
+          Savatga qo'shish
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOT_TOKEN = '8799360604:AAEsAHAxI4FlYUItmERafpE7FxX0cSvrUmM';
+const CHAT_ID   = '8424842589';
+
+const menuData = {
+  burgers:{title:'Burgerlar 🍔',items:[
+    {id:1, name:'Classic Burger',     desc:"Mol go'shti kotleti, pishloq, salat, pomidor va maxsus sous bilan",            price:22000, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80'},
+    {id:2, name:'Double Burger',      desc:"Ikki qavat mol go'shti, cheddar pishloq va BBQ sous",                          price:32000, img:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600&q=80'},
+    {id:3, name:'Chicken Burger',     desc:"Qovurilgan tovuq filesi, ko'k salat va limon-garlik sous",                     price:24000, img:'https://images.unsplash.com/photo-1606755962773-d324e9a13086?w=600&q=80'},
+    {id:4, name:'Spicy Burger',       desc:"Achchiq qalampir sous, jalapeno va crispy tovuq bilan",                        price:26000, img:'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=600&q=80'},
+    {id:5, name:'Mushroom Burger',    desc:"Qovurilgan qo'ziqorin, shveytsariya pishloq va teryaki sous",                  price:28000, img:'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'},
+  ]},
+  hotdog:{title:'Hot Dog 🌭',items:[
+    {id:10, name:'Classic Hot Dog',   desc:'Juicy kolbasa, ketchup, gorchitsa va piyoz bilan',                             price:12000, img:'https://images.unsplash.com/photo-1612392062798-dab94db5da41?w=600&q=80'},
+    {id:11, name:'Cheese Hot Dog',    desc:'Kolbasa, eritilgan cheddar pishloq va jalapeno bilan',                         price:15000, img:'https://images.unsplash.com/photo-1612392062798-dab94db5da41?w=600&q=80'},
+    {id:12, name:'BBQ Hot Dog',       desc:'Dudlangan kolbasa, BBQ sous va qovurilgan piyoz bilan',                        price:16000, img:'https://images.unsplash.com/photo-1612392062798-dab94db5da41?w=600&q=80'},
+  ]},
+  pizza:{title:'Pizza 🍕',items:[
+    {id:20, name:'Margarita',         desc:"Pomidor sous, mozzarella va yangi rayhon barglari",                            price:38000, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80'},
+    {id:21, name:'Pepperoni',         desc:"Pepperoni, mozzarella va pomidor sous — klassik tanlov",                       price:45000, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=600&q=80'},
+    {id:22, name:"4 ta Pishloq",      desc:"Mozzarella, cheddar, parmezan va gorgonzola aralashmasi",                     price:52000, img:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80'},
+    {id:23, name:'BBQ Tovuq Pizza',   desc:"Qovurilgan tovuq, BBQ sous, qizil piyoz va mozzarella",                       price:48000, img:'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=600&q=80'},
+  ]},
+  shawarma:{title:'Shawarma 🌯',items:[
+    {id:30, name:"Tovuq Shawarma",    desc:"Lavash ichida tovuq, ko'k salat, pomidor va garlik sous",                      price:18000, img:'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80'},
+    {id:31, name:"Mol Shawarma",      desc:"Mol go'shti, piyoz, sabzavotlar va maxsus shawarma sous",                     price:22000, img:'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80'},
+    {id:32, name:'Aralash Shawarma',  desc:"Tovuq va mol go'shti, ikki xil sous va sabzavot bilan",                       price:24000, img:'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80'},
+    {id:33, name:'Mini Shawarma',     desc:"Kichkina o'lchamda, 2 ta, tez ovqatlanish uchun ideal",                       price:14000, img:'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80'},
+  ]},
+  kartoshka:{title:'Fri Kartoshka 🍟',items:[
+    {id:40, name:'Kichik Fri',        desc:'Tuz va ketchup bilan, 100g',                                                   price:8000,  img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80'},
+    {id:41, name:"O'rta Fri",         desc:'Tuz va ketchup bilan, 150g',                                                   price:10000, img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80'},
+    {id:42, name:'Katta Fri',         desc:'Tuz va ketchup bilan, 200g',                                                   price:13000, img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80'},
+    {id:43, name:'Pishloqli Fri',     desc:'Eritilgan cheddar pishloq va bekon bilan',                                     price:16000, img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80'},
+    {id:44, name:'Spicy Fri',         desc:"Achchiq baharat va chipotle sous bilan",                                       price:14000, img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80'},
+  ]},
+  combo:{title:'Kombo To\'plamlar 💰',items:[
+    {id:50, name:'Classic Combo',     desc:"Classic Burger + O'rta Fri + Coca-Cola 0.5L",                                  price:38000, img:'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'},
+    {id:51, name:'Family Combo',      desc:"2x Burger + Katta Fri + 2x ichimlik — oila uchun ideal",                       price:75000, img:'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'},
+    {id:52, name:'Kids Combo',        desc:"Mini Burger + Kichik Fri + Juice — bolalar uchun",                              price:28000, img:'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'},
+    {id:53, name:'Mega Combo',        desc:"Double Burger + Katta Fri + Milkshake + Donut",                                price:58000, img:'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'},
+  ]},
+  gazli:{title:'Gazli Ichimliklar 🥤',items:[
+    {id:60, name:'Coca-Cola 0.5L',    desc:'Muzli sovuq, gazli',                                                           price:7000,  img:'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80'},
+    {id:61, name:'Pepsi 0.5L',        desc:'Sovuq gazli ichimlik',                                                         price:6000,  img:'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=600&q=80'},
+    {id:62, name:'Sprite 0.5L',       desc:"Limon ta'mi, sovuq",                                                           price:6000,  img:'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=600&q=80'},
+    {id:63, name:'Fanta 0.5L',        desc:"Apelsin ta'mi",                                                                price:6000,  img:'https://images.unsplash.com/photo-1534353341976-7e57b9bf88c3?w=600&q=80'},
+    {id:64, name:'Mineral Suv',       desc:'0.5L, gazli yoki gazsiz',                                                      price:4000,  img:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=600&q=80'},
+  ]},
+  milkshake:{title:'Milkshake 🥛',items:[
+    {id:70, name:'Vanilla Shake',     desc:"Sof vanil ta'mi, kremli va zich",                                              price:16000, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80'},
+    {id:71, name:'Chocolate Shake',   desc:"Qoʻsh shokolad, kakaoli va muzqaymoqli",                                       price:17000, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80'},
+    {id:72, name:'Strawberry Shake',  desc:"Yangi qulupnay va limon bilan",                                                price:18000, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80'},
+    {id:73, name:'Oreo Shake',        desc:"Oreo cookie va vanilla muzqaymoq bilan",                                       price:20000, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&q=80'},
+  ]},
+  limonad:{title:'Limonad 🍋',items:[
+    {id:80, name:'Klassik Limonad',   desc:'Limon, shakar va muzli suv bilan, 0.4L',                                       price:11000, img:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80'},
+    {id:81, name:'Qulupnay Limonad',  desc:'Yangi qulupnay va limon bilan, 0.4L',                                          price:13000, img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&q=80'},
+    {id:82, name:'Nana Limonad',      desc:'Yangi nana va limon, juda salqin, 0.4L',                                       price:12000, img:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80'},
+  ]},
+  kofe:{title:'Kofe ☕',items:[
+    {id:90, name:'Espresso',          desc:"Kuchli, 30ml",                                                                 price:8000,  img:'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&q=80'},
+    {id:91, name:'Kapuchino',         desc:"Sut ko'pigi bilan, 250ml",                                                     price:13000, img:'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80'},
+    {id:92, name:'Latte',             desc:"Yumshoq sut bilan, 300ml",                                                     price:15000, img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80'},
+  ]},
+  icecream:{title:'Muzqaymoq 🍦',items:[
+    {id:100, name:'Vanilla Krem',     desc:"Klassik vanil muzqaymoq, krujkada",                                            price:9000,  img:'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&q=80'},
+    {id:101, name:'Shokolad Krem',    desc:"Qoʻsh shokolad qoplama bilan",                                                 price:11000, img:'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600&q=80'},
+    {id:102, name:'Soft Ice Cone',    desc:"Konus ichida, vanil yoki shokolad",                                            price:7000,  img:'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=80'},
+    {id:103, name:'Sundae',           desc:"Muzqaymoq, sharbat va qo'ziqorin bilan",                                       price:16000, img:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80'},
+  ]},
+  donuts:{title:'Donut 🍩',items:[
+    {id:110, name:'Klassik Glazed',   desc:"Qand shira bilan qoplangan, yumshoq va shirin",                                price:8000,  img:'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80'},
+    {id:111, name:'Shokolad Donut',   desc:"Qoʻsh shokolad glazur va sprinkles bilan",                                     price:10000, img:'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&q=80'},
+    {id:112, name:'Strawberry Donut', desc:"Qulupnay jam ichida, pushti glazur bilan",                                     price:11000, img:'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80'},
+    {id:113, name:'Donut Box (6 ta)', desc:"6 ta turli xil donut bir qutida",                                              price:48000, img:'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80'},
+  ]},
+  nuggets:{title:'Nuggets 🍗',items:[
+    {id:120, name:'6 ta Nuggets',     desc:"Mayiz qatlamida qovurilgan tovuq, ketchup bilan",                              price:12000, img:'https://images.unsplash.com/photo-1562967916-eb82221dfb92?w=600&q=80'},
+    {id:121, name:'12 ta Nuggets',    desc:"BBQ yoki ketchup sous tanlash mumkin",                                         price:22000, img:'https://images.unsplash.com/photo-1562967916-eb82221dfb92?w=600&q=80'},
+    {id:122, name:'20 ta Nuggets',    desc:"Oila uchun katta to'plam, 2 xil sous",                                         price:35000, img:'https://images.unsplash.com/photo-1562967916-eb82221dfb92?w=600&q=80'},
+  ]},
+};
+
+const allItems = Object.values(menuData).flatMap(c => c.items);
+let cart = [];
+let isTransitioning = false;
+let activeTab = 'taomlar';
+let detailItem = null;
+let detailQty = 1;
+
+// LOADER
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 2500);
+});
+
+// TAB SWITCH
+function switchTab(btn, tab) {
+  if (tab === activeTab) return;
+  const searchInput = document.getElementById('search-input');
+  if (searchInput.value) {
+    searchInput.value = '';
+    document.getElementById('search-results-wrap').classList.remove('active');
+  }
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const prev = document.getElementById('tab-' + activeTab);
+  if (prev) prev.classList.remove('active');
+  activeTab = tab;
+  const next = document.getElementById('tab-' + tab);
+  if (next) requestAnimationFrame(() => next.classList.add('active'));
+}
+
+// SEARCH
+function onSearch(q) {
+  q = q.trim().toLowerCase();
+  const wrap = document.getElementById('search-results-wrap');
+  const list = document.getElementById('search-results-list');
+  if (!q) { wrap.classList.remove('active'); return; }
+  wrap.classList.add('active');
+  const found = allItems.filter(i => i.name.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
+  if (!found.length) {
+    list.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-magnifying-glass"></i>Hech narsa topilmadi</div>';
+    return;
+  }
+  list.innerHTML = '';
+  found.forEach((item, i) => buildItemCard(item, i, list));
+}
+
+// SCREEN TRANSITIONS
+function openCategory(key) {
+  if (isTransitioning) return;
+  const data = menuData[key];
+  if (!data) return;
+  isTransitioning = true;
+  document.getElementById('items-title').textContent = data.title;
+  const list = document.getElementById('items-list');
+  list.innerHTML = '';
+  data.items.forEach((item, i) => buildItemCard(item, i, list));
+  const homeScreen  = document.getElementById('screen-home');
+  const itemsScreen = document.getElementById('screen-items');
+  itemsScreen.style.cssText = 'position:absolute;inset:0;display:block;opacity:0;transform:translateX(32px);pointer-events:none;transition:none;';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      homeScreen.style.transition  = 'opacity 300ms ease, transform 300ms ease';
+      homeScreen.style.opacity     = '0';
+      homeScreen.style.transform   = 'translateX(-24px)';
+      itemsScreen.style.transition = 'opacity 300ms ease, transform 300ms ease';
+      itemsScreen.style.transform  = 'translateX(0)';
+      itemsScreen.style.opacity    = '1';
+      setTimeout(() => {
+        homeScreen.classList.remove('active');
+        homeScreen.style.cssText = '';
+        itemsScreen.classList.add('active');
+        itemsScreen.style.cssText = '';
+        itemsScreen.scrollTop = 0;
+        isTransitioning = false;
+      }, 310);
+    });
+  });
+}
+
+function goBack() {
+  if (isTransitioning) return;
+  isTransitioning = true;
+  const homeScreen  = document.getElementById('screen-home');
+  const itemsScreen = document.getElementById('screen-items');
+  homeScreen.style.cssText = 'position:absolute;inset:0;display:block;opacity:0;transform:translateX(-24px);pointer-events:none;transition:none;overflow:hidden;';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      itemsScreen.style.transition = 'opacity 300ms ease, transform 300ms ease';
+      itemsScreen.style.opacity    = '0';
+      itemsScreen.style.transform  = 'translateX(32px)';
+      homeScreen.style.transition  = 'opacity 300ms ease, transform 300ms ease';
+      homeScreen.style.transform   = 'translateX(0)';
+      homeScreen.style.opacity     = '1';
+      setTimeout(() => {
+        itemsScreen.classList.remove('active');
+        itemsScreen.style.cssText = '';
+        homeScreen.classList.add('active');
+        homeScreen.style.cssText = '';
+        isTransitioning = false;
+      }, 310);
+    });
+  });
+}
+
+function buildItemCard(item, idx, container) {
+  const inCart = cart.some(c => c.id === item.id);
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.style.animationDelay = Math.min(idx * 0.06, 0.42) + 's';
+  card.innerHTML =
+    '<div class="item-img-wrap">' +
+      '<img class="item-img" src="' + item.img + '" alt="' + item.name + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80\'">' +
+      '<div class="item-price-pill">' + item.price.toLocaleString() + " so'm</div>" +
+    '</div>' +
+    '<div class="item-body">' +
+      '<div class="item-text">' +
+        '<div class="item-name">' + item.name + '</div>' +
+        '<div class="item-desc">' + item.desc + '</div>' +
+      '</div>' +
+      '<button class="add-btn' + (inCart ? ' added' : '') + '" id="addbtn-' + item.id + '" ' +
+        'onclick="event.stopPropagation();addToCart(' + item.id + ')">' +
+        '<i class="fa-solid ' + (inCart ? 'fa-check' : 'fa-plus') + '"></i>' +
+      '</button>' +
+    '</div>';
+  card.addEventListener('click', () => openItemDetail(item));
+  container.appendChild(card);
+}
+
+// ITEM DETAIL MODAL
+function openItemDetail(item) {
+  detailItem = item;
+  detailQty = 1;
+  document.getElementById('item-detail-img').src = item.img;
+  document.getElementById('item-detail-img').alt = item.name;
+  document.getElementById('item-detail-name').textContent = item.name;
+  document.getElementById('item-detail-desc').textContent = item.desc;
+  document.getElementById('item-detail-price').textContent = item.price.toLocaleString() + " so'm";
+  document.getElementById('item-detail-qty-num').textContent = detailQty;
+  const addBtn = document.getElementById('item-detail-add-btn');
+  addBtn.classList.remove('added');
+  addBtn.textContent = "Savatga qo'shish";
+  document.getElementById('item-detail-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeItemDetail() {
+  document.getElementById('item-detail-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  detailItem = null;
+}
+
+function itemDetailBackdropClick(e) {
+  if (e.target.id === 'item-detail-backdrop') closeItemDetail();
+}
+
+function changeDetailQty(d) {
+  detailQty = Math.max(1, detailQty + d);
+  document.getElementById('item-detail-qty-num').textContent = detailQty;
+}
+
+function addFromDetail() {
+  if (!detailItem) return;
+  const existing = cart.find(c => c.id === detailItem.id);
+  if (existing) existing.qty += detailQty;
+  else cart.push({ id:detailItem.id, name:detailItem.name, price:detailItem.price, img:detailItem.img, qty:detailQty });
+  const addBtn = document.getElementById('item-detail-add-btn');
+  addBtn.classList.add('added');
+  addBtn.textContent = "Qo'shildi ✓";
+  const btn = document.getElementById('addbtn-' + detailItem.id);
+  if (btn) {
+    btn.classList.add('added');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { btn.classList.remove('added'); btn.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 1600);
+  }
+  updateBadge();
+  setTimeout(closeItemDetail, 900);
+}
+
+// CART
+function addToCart(id) {
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ id:item.id, name:item.name, price:item.price, img:item.img, qty:1 });
+  const btn = document.getElementById('addbtn-' + id);
+  if (btn) {
+    btn.classList.add('added');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { btn.classList.remove('added'); btn.innerHTML = '<i class="fa-solid fa-plus"></i>'; }, 1600);
+  }
+  updateBadge();
+}
+
+function updateBadge() {
+  const n = cart.reduce((s, c) => s + c.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = n;
+  badge.classList.toggle('visible', n > 0);
+}
+
+function renderCart() {
+  const wrap   = document.getElementById('cart-items-wrap');
+  const footer = document.getElementById('cart-footer');
+  const totalEl = document.getElementById('cart-total');
+  if (!cart.length) {
+    wrap.innerHTML = '<div class="cart-empty-msg"><i class="fa-solid fa-bag-shopping"></i>Savat bo\'sh</div>';
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'block';
+  wrap.innerHTML = cart.map((c, i) =>
+    '<div class="cart-item" style="animation-delay:' + (i * 0.05) + 's">' +
+      '<img class="cart-item-img" src="' + c.img + '" alt="' + c.name + '">' +
+      '<div class="cart-item-info">' +
+        '<div class="cart-item-name">' + c.name + '</div>' +
+        '<div class="cart-item-price">' + (c.price * c.qty).toLocaleString() + " so'm</div>" +
+      '</div>' +
+      '<div class="qty-controls">' +
+        '<button class="qty-btn" onclick="changeQty(' + c.id + ',-1)"><i class="fa-solid fa-minus"></i></button>' +
+        '<div class="qty-num">' + c.qty + '</div>' +
+        '<button class="qty-btn" onclick="changeQty(' + c.id + ',1)"><i class="fa-solid fa-plus"></i></button>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+  totalEl.textContent = cart.reduce((s, c) => s + c.price * c.qty, 0).toLocaleString() + " so'm";
+}
+
+function changeQty(id, d) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+  item.qty += d;
+  if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+  updateBadge();
+  renderCart();
+}
+
+function openCart() {
+  renderCart();
+  document.getElementById('cart-backdrop').classList.add('open');
+  document.getElementById('cart-drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cart-backdrop').classList.remove('open');
+  document.getElementById('cart-drawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openOrderModal() {
+  closeCart();
+  setTimeout(() => {
+    document.getElementById('order-form-wrap').style.display = 'block';
+    document.getElementById('success-screen').classList.remove('show');
+    ['f-name','f-phone','f-address'].forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).classList.remove('error');
+    });
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.textContent = 'Yuborish';
+    document.getElementById('order-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }, 80);
+}
+
+function closeOrderModal() {
+  document.getElementById('order-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function backdropClick(e) {
+  if (e.target.id === 'order-modal') closeOrderModal();
+}
+
+async function submitOrder() {
+  const name    = document.getElementById('f-name').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+  const address = document.getElementById('f-address').value.trim();
+  let ok = true;
+  ['f-name','f-phone','f-address'].forEach(id => document.getElementById(id).classList.remove('error'));
+  if (!name)    { markError('f-name');    ok = false; }
+  if (!phone)   { markError('f-phone');   ok = false; }
+  if (!address) { markError('f-address'); ok = false; }
+  if (!ok) return;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Yuborilmoqda...';
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const lines = cart.map(c => '  ' + c.name + ' x' + c.qty + '  =  ' + (c.price * c.qty).toLocaleString() + " so'm").join('\n');
+  const msg =
+    '━'.repeat(20) + '\n' +
+    '   YANGI BUYURTMA\n   GunAydin Fast Food\n' +
+    '━'.repeat(20) + '\n' +
+    'Mijoz:   ' + name + '\nTelefon: ' + phone + '\nManzil:  ' + address + '\n' +
+    '─'.repeat(20) + '\n' +
+    'Buyurtma:\n' + lines + '\n' +
+    '─'.repeat(20) + '\n' +
+    "JAMI:  " + total.toLocaleString() + " so'm\n" +
+    '━'.repeat(20);
+  try {
+    const res = await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ chat_id:CHAT_ID, text:msg })
+    });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.description || 'Telegram xato'); }
+    showSuccess(btn);
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'Yuborish';
+    alert('Xatolik: ' + e.message);
+  }
+}
+
+function markError(id) {
+  const el = document.getElementById(id);
+  el.classList.add('error');
+  el.focus();
+  setTimeout(() => el.classList.remove('error'), 1500);
+}
+
+function showSuccess(btn) {
+  cart = [];
+  updateBadge();
+  document.getElementById('order-form-wrap').style.display = 'none';
+  document.getElementById('success-screen').classList.add('show');
+  btn.disabled = false;
+  btn.textContent = 'Yuborish';
+  setTimeout(closeOrderModal, 3200);
+}
+</script>
 </body>
 </html>
+
